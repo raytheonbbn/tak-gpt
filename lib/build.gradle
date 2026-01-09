@@ -1,0 +1,76 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'java-library'
+    id("com.gradleup.shadow") version "9.3.1"
+}
+
+repositories {
+  maven {
+    url = 'https://artifacts.tak.gov/artifactory/maven'
+    credentials {
+      username = "$takGovUser"
+      password = "$takGovPassword"
+    }
+  }
+  mavenCentral()
+}
+
+dependencies {
+    compileOnly (group: 'gov.tak', name: 'takserver-plugins', version: takserver_plugins_version, classifier: 'all')
+    implementation ('dev.langchain4j:langchain4j:1.9.1')
+    implementation ("dev.langchain4j:langchain4j-ollama:1.9.1")
+    implementation ("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:1.9.1-beta17")
+    implementation ('com.h2database:h2:2.2.224')
+    implementation ('ch.qos.logback:logback-classic:1.5.3')
+    implementation ("com.openai:openai-java:4.14.0")
+    implementation ("com.anthropic:anthropic-java:2.11.1")
+    implementation ("dev.langchain4j:langchain4j-vertex-ai-gemini:1.9.1-beta17")
+    implementation ("com.google.adk:google-adk-contrib-langchain4j:0.2.0")
+    implementation ("com.google.adk:google-adk:0.5.0")
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.guava:guava:33.4.0-jre'
+    }
+}
+
+testing {
+    suites {
+        // Configure the built-in test suite
+        test {
+            // Use JUnit4 test framework
+            useJUnit('4.13.2')
+        }
+    }
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType(Zip) {
+    zip64 = true
+}
+
+shadowJar {
+    zip64 = true
+    archiveBaseName = 'tak-gpt-all'
+    relocate ("com.google.common.collect", "shadow.com.google.common.collect")
+    dependencies {
+       exclude(dependency("com.h2database:h2:2.2.224"))
+        exclude(dependency("ch.qos.logback:logback-classic:1.5.3"))
+        exclude(dependency("ch.qos.logback:logback-core:1.5.3"))
+        exclude(dependency("org.slf4j:slf4j-simple:.*"))
+        exclude(dependency("org.slf4j:slf4j-api:.*"))
+        exclude(dependency("org.apache.httpcomponents.client5:httpclient5:.*"))
+    }
+}

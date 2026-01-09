@@ -1,0 +1,38 @@
+for RAG in docker container:
+
+First setup docker container to be able to access GPUs:
+
+# Add the package repositories
+$ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+$ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+$ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+$ sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+$ sudo systemctl restart docker
+
+then run docker container with this flag set in docker run command:
+--gpus all
+
+---------------------------
+
+Then, in the container, install tools used by langchain document parsers:
+
+exiftool
+	- https://exiftool.org/install.html#Unix
+	- may need to install extra tools to get the above to work:
+		- apt install libextutils-modulemaker-perl
+		- apt install make
+apt install ffmpeg
+apt install tesseract-ocr
+image magik
+
+as well as:
+
+libcudart11.0
+
+(may have to first run: apt --fix-broken install)
+
+
+
+
+
